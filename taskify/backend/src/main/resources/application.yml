@@ -1,8 +1,11 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
+
 spring:
   data:
     mongodb:
       uri: ${MONGODB_URI}
-  secret: VerySecretKeyChangeThisInProd1234567890
+
+jwt:
+  secret: ${JWT_SECRET:VerySecretKeyChangeThisInProd1234567890}
   expiration-ms: 86400000
