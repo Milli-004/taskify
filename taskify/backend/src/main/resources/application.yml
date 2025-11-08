@@ -1,0 +1,9 @@
+server:
+  port: 8080
+spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://<username>:<password>@cluster.mongodb.net/taskify?retryWrites=true&w=majority
+jwt:
+  secret: VerySecretKeyChangeThisInProd1234567890
+  expiration-ms: 86400000
