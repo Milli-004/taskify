@@ -1,4 +1,4 @@
-package com.example.taskify.config;
+package com.taskify.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,10 +15,11 @@ public class WebConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins(
-                            "https://taskify-blue-seven.vercel.app", // your frontend URL
-                            "http://localhost:3000" // optional for local testing
+                            "https://taskify-blue-seven.vercel.app",
+                            "http://localhost:3000"
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*")
                         .allowCredentials(true);
             }
         };
