@@ -1,20 +1,21 @@
-# Use an official OpenJDK 17 image as a base
-FROM openjdk:17-jdk-buster
+# Stage 1: Build with Maven and JDK
+FROM maven:3.8.6-openjdk-17 AS build
 
-# Set working directory inside container
 WORKDIR /app
 
-# Copy pom.xml and download dependencies first (for caching)
 COPY pom.xml .
-RUN apt-get update && apt-get install -y maven
 RUN mvn dependency:go-offline
 
-# Copy project files and build the jar
-COPY . .
+COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Expose port 8080
+# Stage 2: Run with JDK runtime only
+FROM openjdk:17-jdk
+
+WORKDIR /app
+
+COPY --from=build /app/target/taskify-0.0.1-SNAPSHOT.jar app.jar
+
 EXPOSE 8080
 
-# Run the application
-CMD ["java", "-jar", "target/taskify-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-jar", "app.jar"]
