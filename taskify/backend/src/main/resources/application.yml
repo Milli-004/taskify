@@ -3,7 +3,7 @@ server:
 spring:
   data:
     mongodb:
-      uri: mongodb+srv://<username>:<password>@cluster.mongodb.net/taskify?retryWrites=true&w=majority
+      uri: mongodb+srv://millisrivastava73_db_user:<db_password>@cluster0.oug6802.mongodb.net/?appName=Cluster0
 jwt:
   secret: VerySecretKeyChangeThisInProd1234567890
   expiration-ms: 86400000
