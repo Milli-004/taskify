@@ -38,12 +38,13 @@ public class AuthController {
         
         // Hash password before saving
         u.setPassword(passwordEncoder.encode(u.getPassword()));
-        userRepository.save(u);
+        User saved = userRepository.save(u);
         
         String token = jwtUtil.generateToken(u.getUsername());
         return ResponseEntity.ok(Map.of(
             "token", token,
-            "username", u.getUsername(),
+            "username", saved.getUsername(),
+            "userId", saved.getId(),  // ✅ Return database ID
             "message", "registration_success"
         ));
     }
@@ -62,10 +63,12 @@ public class AuthController {
             return ResponseEntity.status(401).body(Map.of("message","invalid_credentials"));
         }
         
-        String token = jwtUtil.generateToken(u.getUsername());
+        User user = opt.get();
+        String token = jwtUtil.generateToken(user.getUsername());
         return ResponseEntity.ok(Map.of(
             "token", token, 
-            "username", u.getUsername(),
+            "username", user.getUsername(),
+            "userId", user.getId(),  // ✅ Return database ID
             "message", "login_success"
         ));
     }
