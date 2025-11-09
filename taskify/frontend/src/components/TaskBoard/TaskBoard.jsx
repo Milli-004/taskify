@@ -8,9 +8,14 @@ export default function TaskBoard(){
   const dispatch = useDispatch();
   const tasks = useSelector(s => s.tasks.list);
   const status = useSelector(s => s.tasks.status);
+  const error = useSelector(s => s.tasks.error);
   const user = useSelector(s => s.auth.user) || 'demoUser';
 
-  useEffect(()=>{ dispatch(fetchTasks(user)); }, [dispatch, user]);
+  useEffect(()=>{ 
+    if (user) {
+      dispatch(fetchTasks(user)); 
+    }
+  }, [dispatch, user]);
 
   const [title, setTitle] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -146,6 +151,14 @@ export default function TaskBoard(){
           <div className="loading">
             <div className="spinner"></div>
           </div>
+        ) : error ? (
+          <div className="error-state">
+            <div className="error-icon">⚠️</div>
+            <div className="error-text">{error}</div>
+            <button className="btn btn-primary" onClick={() => dispatch(fetchTasks(user))}>
+              🔄 Retry
+            </button>
+          </div>
         ) : filteredTasks.length === 0 ? (
           <div className="empty-state">
             <div className="empty-state-icon">
@@ -242,4 +255,4 @@ export default function TaskBoard(){
       )}
     </div>
   );
-}
+              }
