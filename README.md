@@ -1,7 +1,7 @@
 # 📋 Taskify - Modern Task Management Application
 
 A full-stack task management application built with **React**, **Redux**, **Spring Boot**, and **MongoDB**. Features a beautiful glassmorphic UI with modern animations and complete CRUD operations.
-
+Java Full Stack Website made by the team of 2
 ## 🌟 Features
 
 ### Frontend Features
@@ -317,7 +317,8 @@ This project is licensed under the MIT License.
 
 ## 👨‍💻 Author
 
-**Your Name** - College Project
+Made by : Milli Srivastava
+Snehil Singh
 
 ## 🙏 Acknowledgments
 
@@ -327,10 +328,5 @@ This project is licensed under the MIT License.
 - Chart.js Documentation
 - Community tutorials and resources
 
-## 📞 Support
-
-For support, email your-email@example.com or create an issue in the repository.
-
----
 
 **Made with ❤️ for College Project**
