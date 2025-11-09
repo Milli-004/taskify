@@ -4,6 +4,7 @@ import com.taskify.model.Task;
 import com.taskify.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,9 +17,21 @@ public class TaskController {
     @Autowired
     private TaskRepository taskRepository;
 
+    // ✅ Get authenticated username from token
+    private String getAuthenticatedUsername(Authentication auth) {
+        return auth.getName();
+    }
+
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Task>> getByUser(@PathVariable String userId){
+    public ResponseEntity<List<Task>> getByUser(@PathVariable String userId, Authentication auth){
         try {
+            String authenticatedUser = getAuthenticatedUsername(auth);
+            
+            // ✅ SECURITY: Only allow users to see their own tasks
+            if (!authenticatedUser.equals(userId)) {
+                return ResponseEntity.status(403).build();  // Forbidden
+            }
+            
             List<Task> tasks = taskRepository.findByUserId(userId);
             return ResponseEntity.ok(tasks);
         } catch (Exception e) {
@@ -32,9 +45,17 @@ public class TaskController {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String priority,
             @RequestParam(required = false) String category,
-            @RequestParam(required = false) String search
+            @RequestParam(required = false) String search,
+            Authentication auth
     ){
         try {
+            String authenticatedUser = getAuthenticatedUsername(auth);
+            
+            // ✅ SECURITY: Only allow users to filter their own tasks
+            if (!authenticatedUser.equals(userId)) {
+                return ResponseEntity.status(403).build();
+            }
+            
             List<Task> tasks = taskRepository.findByUserId(userId);
             
             // Filter by status
@@ -76,13 +97,15 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<Task> create(@RequestBody Task t){
+    public ResponseEntity<Task> create(@RequestBody Task t, Authentication auth){
         try {
+            String authenticatedUser = getAuthenticatedUsername(auth);
+            
+            // ✅ SECURITY: Force userId to be the authenticated user
+            t.setUserId(authenticatedUser);
+            
             // Validate required fields
             if(t.getTitle() == null || t.getTitle().trim().isEmpty()){
-                return ResponseEntity.badRequest().build();
-            }
-            if(t.getUserId() == null || t.getUserId().trim().isEmpty()){
                 return ResponseEntity.badRequest().build();
             }
             
@@ -98,12 +121,19 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Task> update(@PathVariable String id, @RequestBody Task t){
+    public ResponseEntity<Task> update(@PathVariable String id, @RequestBody Task t, Authentication auth){
         try {
+            String authenticatedUser = getAuthenticatedUsername(auth);
+            
             var opt = taskRepository.findById(id);
             if(opt.isEmpty()) return ResponseEntity.notFound().build();
             
             Task existing = opt.get();
+            
+            // ✅ SECURITY: Only allow users to update their own tasks
+            if (!authenticatedUser.equals(existing.getUserId())) {
+                return ResponseEntity.status(403).build();
+            }
             
             // Update only provided fields
             if(t.getTitle() != null) existing.setTitle(t.getTitle());
@@ -122,11 +152,20 @@ public class TaskController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable String id){
+    public ResponseEntity<?> delete(@PathVariable String id, Authentication auth){
         try {
-            if(!taskRepository.existsById(id)){
-                return ResponseEntity.notFound().build();
+            String authenticatedUser = getAuthenticatedUsername(auth);
+            
+            var opt = taskRepository.findById(id);
+            if(opt.isEmpty()) return ResponseEntity.notFound().build();
+            
+            Task existing = opt.get();
+            
+            // ✅ SECURITY: Only allow users to delete their own tasks
+            if (!authenticatedUser.equals(existing.getUserId())) {
+                return ResponseEntity.status(403).build();
             }
+            
             taskRepository.deleteById(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
@@ -135,8 +174,15 @@ public class TaskController {
     }
     
     @GetMapping("/stats/{userId}")
-    public ResponseEntity<?> getStats(@PathVariable String userId){
+    public ResponseEntity<?> getStats(@PathVariable String userId, Authentication auth){
         try {
+            String authenticatedUser = getAuthenticatedUsername(auth);
+            
+            // ✅ SECURITY: Only allow users to see their own stats
+            if (!authenticatedUser.equals(userId)) {
+                return ResponseEntity.status(403).build();
+            }
+            
             List<Task> tasks = taskRepository.findByUserId(userId);
             
             long total = tasks.size();
