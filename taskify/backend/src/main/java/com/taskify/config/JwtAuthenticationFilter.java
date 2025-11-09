@@ -25,9 +25,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response, 
                                     FilterChain filterChain) throws ServletException, IOException {
         
-        // Skip authentication for login/register endpoints
         String path = request.getRequestURI();
-        if (path.contains("/auth/login") || path.contains("/auth/register")) {
+        if (path.equals("/api/auth/login") || path.equals("/api/auth/register")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -40,14 +39,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String username = jwtUtil.extractUsername(token);
                 
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    // Create authentication token
                     UsernamePasswordAuthenticationToken authToken = 
                         new UsernamePasswordAuthenticationToken(username, null, new ArrayList<>());
-                    
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
                 response.getWriter().write("{\"message\":\"Invalid or expired token\"}");
                 return;
             }
