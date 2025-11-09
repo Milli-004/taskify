@@ -17,7 +17,6 @@ public class TaskController {
     @Autowired
     private TaskRepository taskRepository;
 
-    // ✅ Get authenticated username from token
     private String getAuthenticatedUsername(Authentication auth) {
         return auth.getName();
     }
@@ -27,9 +26,9 @@ public class TaskController {
         try {
             String authenticatedUser = getAuthenticatedUsername(auth);
             
-            // ✅ SECURITY: Only allow users to see their own tasks
+            // ✅ FIXED: userId in URL is username from frontend
             if (!authenticatedUser.equals(userId)) {
-                return ResponseEntity.status(403).build();  // Forbidden
+                return ResponseEntity.status(403).build();
             }
             
             List<Task> tasks = taskRepository.findByUserId(userId);
@@ -51,35 +50,30 @@ public class TaskController {
         try {
             String authenticatedUser = getAuthenticatedUsername(auth);
             
-            // ✅ SECURITY: Only allow users to filter their own tasks
             if (!authenticatedUser.equals(userId)) {
                 return ResponseEntity.status(403).build();
             }
             
             List<Task> tasks = taskRepository.findByUserId(userId);
             
-            // Filter by status
             if(status != null && !status.isEmpty()){
                 tasks = tasks.stream()
                         .filter(t -> status.equals(t.getStatus()))
                         .collect(Collectors.toList());
             }
             
-            // Filter by priority
             if(priority != null && !priority.isEmpty()){
                 tasks = tasks.stream()
                         .filter(t -> priority.equals(t.getPriority()))
                         .collect(Collectors.toList());
             }
             
-            // Filter by category
             if(category != null && !category.isEmpty()){
                 tasks = tasks.stream()
                         .filter(t -> category.equals(t.getCategory()))
                         .collect(Collectors.toList());
             }
             
-            // Search in title and description
             if(search != null && !search.isEmpty()){
                 String searchLower = search.toLowerCase();
                 tasks = tasks.stream()
@@ -101,15 +95,13 @@ public class TaskController {
         try {
             String authenticatedUser = getAuthenticatedUsername(auth);
             
-            // ✅ SECURITY: Force userId to be the authenticated user
+            // ✅ Set userId to authenticated username
             t.setUserId(authenticatedUser);
             
-            // Validate required fields
             if(t.getTitle() == null || t.getTitle().trim().isEmpty()){
                 return ResponseEntity.badRequest().build();
             }
             
-            // Set defaults if not provided
             if(t.getPriority() == null) t.setPriority("medium");
             if(t.getStatus() == null) t.setStatus("todo");
             
@@ -130,12 +122,11 @@ public class TaskController {
             
             Task existing = opt.get();
             
-            // ✅ SECURITY: Only allow users to update their own tasks
+            // ✅ Check if task belongs to authenticated user
             if (!authenticatedUser.equals(existing.getUserId())) {
                 return ResponseEntity.status(403).build();
             }
             
-            // Update only provided fields
             if(t.getTitle() != null) existing.setTitle(t.getTitle());
             if(t.getDescription() != null) existing.setDescription(t.getDescription());
             existing.setCompleted(t.isCompleted());
@@ -161,7 +152,6 @@ public class TaskController {
             
             Task existing = opt.get();
             
-            // ✅ SECURITY: Only allow users to delete their own tasks
             if (!authenticatedUser.equals(existing.getUserId())) {
                 return ResponseEntity.status(403).build();
             }
@@ -178,7 +168,6 @@ public class TaskController {
         try {
             String authenticatedUser = getAuthenticatedUsername(auth);
             
-            // ✅ SECURITY: Only allow users to see their own stats
             if (!authenticatedUser.equals(userId)) {
                 return ResponseEntity.status(403).build();
             }
