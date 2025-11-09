@@ -286,6 +286,138 @@ body {
   background: var(--primary);
 }
 
+.btn-logout {
+  background: rgba(244, 113, 116, 0.2);
+  border: 1px solid rgba(244, 113, 116, 0.4);
+  color: #f47174;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+  background: rgba(244, 113, 116, 0.3);
+  border-color: #f47174;
+  transform: scale(1.05);
+}
+
+/* Filters Container */
+.filters-container {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  flex: 2;
+  min-width: 200px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 0.875rem 1.125rem;
+  color: var(--text-light);
+  font-size: 0.95rem;
+  outline: none;
+  transition: var(--transition);
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(110, 223, 246, 0.4);
+}
+
+.filter-select {
+  flex: 1;
+  min-width: 140px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 0.875rem 1.125rem;
+  color: var(--text-light);
+  font-size: 0.95rem;
+  outline: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.filter-select:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.filter-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(110, 223, 246, 0.4);
+}
+
+/* Edit Button */
+.btn-edit {
+  background: rgba(160, 132, 232, 0.2);
+  border: 1px solid rgba(160, 132, 232, 0.4);
+  color: var(--primary);
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-edit:hover {
+  background: rgba(160, 132, 232, 0.3);
+  border-color: var(--primary);
+  transform: scale(1.1);
+}
+
+/* Priority Badge */
+.priority-badge {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  border: 1px solid;
+}
+
+/* Category Badge */
+.category-badge {
+  background: rgba(255, 178, 107, 0.2);
+  color: var(--secondary);
+  border: 1px solid rgba(255, 178, 107, 0.4);
+  font-weight: 600;
+}
+
+/* Date Badge */
+.date-badge {
+  background: rgba(110, 223, 246, 0.2);
+  color: var(--accent);
+  border: 1px solid rgba(110, 223, 246, 0.4);
+  font-weight: 600;
+}
+
+/* Task Item with Priority Border */
+.task-item {
+  border-left: 4px solid var(--primary);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .filters-container {
+    flex-direction: column;
+  }
+  
+  .search-input,
+  .filter-select {
+    flex: 1;
+    min-width: 100%;
+  }
+  
+  .btn-logout {
+    width: 100%;
+  }
+}
+
 /* === RESPONSIVE === */
 @media (max-width: 900px) {
   .main-content {
