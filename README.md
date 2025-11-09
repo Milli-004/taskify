@@ -317,7 +317,7 @@ This project is licensed under the MIT License.
 
 ## 👨‍💻 Author
 
-Made by : Milli Srivastava
+Made by : Milli Srivastava and 
 Snehil Singh
 
 ## 🙏 Acknowledgments
