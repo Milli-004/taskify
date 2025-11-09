@@ -4,8 +4,8 @@ server:
 spring:
   data:
     mongodb:
-      uri: ${MONGODB_URI}
+      uri: ${MONGODB_URI:mongodb://localhost:27017/taskify}
 
 jwt:
-  secret: ${JWT_SECRET:VerySecretKeyChangeThisInProd1234567890}
+  secret: ${JWT_SECRET:VerySecretKeyMinimum32CharactersLong12345678901234567890}
   expiration-ms: 86400000
