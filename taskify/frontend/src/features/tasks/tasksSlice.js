@@ -23,17 +23,31 @@ export const deleteTask = createAsyncThunk('tasks/delete', async (id) => {
 
 const slice = createSlice({
   name: 'tasks',
-  initialState: { list: [], status: 'idle' },
+  initialState: { list: [], status: 'idle', error: null },
   reducers: {},
   extraReducers: builder => {
-    builder.addCase(fetchTasks.fulfilled, (state, action) => { state.list = action.payload; });
-    builder.addCase(addTask.fulfilled, (state, action) => { state.list.push(action.payload); });
-    builder.addCase(updateTask.fulfilled, (state, action) => {
-      state.list = state.list.map(t => t.id === action.payload.id ? action.payload : t);
-    });
-    builder.addCase(deleteTask.fulfilled, (state, action) => {
-      state.list = state.list.filter(t => t.id !== action.payload);
-    });
+    builder
+      .addCase(fetchTasks.pending, (state) => { 
+        state.status = 'loading'; 
+      })
+      .addCase(fetchTasks.fulfilled, (state, action) => { 
+        state.list = action.payload;
+        state.status = 'succeeded';
+        state.error = null;
+      })
+      .addCase(fetchTasks.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
+      })
+      .addCase(addTask.fulfilled, (state, action) => { 
+        state.list.push(action.payload); 
+      })
+      .addCase(updateTask.fulfilled, (state, action) => {
+        state.list = state.list.map(t => t.id === action.payload.id ? action.payload : t);
+      })
+      .addCase(deleteTask.fulfilled, (state, action) => {
+        state.list = state.list.filter(t => t.id !== action.payload);
+      });
   }
 });
 
