@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchTasks, addTask, updateTask, deleteTask } from '../../features/tasks/tasksSlice';
 import Dashboard from '../Dashboard/Dashboard';
+import TaskModal from '../TaskModal/TaskModal';
 
 export default function TaskBoard(){
   const dispatch = useDispatch();
@@ -12,19 +13,23 @@ export default function TaskBoard(){
   useEffect(()=>{ dispatch(fetchTasks(user)); }, [dispatch, user]);
 
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterPriority, setFilterPriority] = useState('all');
+  const [editingTask, setEditingTask] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   
   const create = () => {
     if (!title.trim()) return;
     dispatch(addTask({ 
       title, 
-      description, 
+      description: '', 
       userId: user, 
       status: 'todo', 
-      completed: false 
+      completed: false,
+      priority: 'medium'
     }));
     setTitle('');
-    setDescription('');
   };
 
   const handleKeyPress = (e) => {
@@ -51,11 +56,45 @@ export default function TaskBoard(){
     }
   };
 
+  const handleEdit = (task) => {
+    setEditingTask(task);
+    setShowModal(true);
+  };
+
+  const handleSaveEdit = (updatedTask) => {
+    dispatch(updateTask({
+      id: updatedTask.id,
+      task: updatedTask
+    }));
+    setShowModal(false);
+    setEditingTask(null);
+  };
+
+  // Filter tasks
+  const filteredTasks = tasks.filter(task => {
+    const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (task.description && task.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesStatus = filterStatus === 'all' || task.status === filterStatus;
+    const matchesPriority = filterPriority === 'all' || task.priority === filterPriority;
+    
+    return matchesSearch && matchesStatus && matchesPriority;
+  });
+
+  const getPriorityColor = (priority) => {
+    switch(priority) {
+      case 'high': return '#f47174';
+      case 'medium': return '#ffb26b';
+      case 'low': return '#4dd599';
+      default: return '#a084e8';
+    }
+  };
+
   return (
     <div className="main-content">
       <div className="task-section">
         <h2>My Tasks</h2>
         
+        {/* Add Task Input */}
         <div className="task-input-container">
           <input 
             className="task-input"
@@ -69,21 +108,62 @@ export default function TaskBoard(){
           </button>
         </div>
 
+        {/* Search and Filters */}
+        <div className="filters-container">
+          <input
+            className="search-input"
+            type="text"
+            placeholder="🔍 Search tasks..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          
+          <select 
+            className="filter-select"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+          >
+            <option value="all">All Status</option>
+            <option value="todo">To Do</option>
+            <option value="in-progress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
+
+          <select 
+            className="filter-select"
+            value={filterPriority}
+            onChange={(e) => setFilterPriority(e.target.value)}
+          >
+            <option value="all">All Priority</option>
+            <option value="high">🔴 High</option>
+            <option value="medium">🟡 Medium</option>
+            <option value="low">🟢 Low</option>
+          </select>
+        </div>
+
+        {/* Task List */}
         {status === 'loading' ? (
           <div className="loading">
             <div className="spinner"></div>
           </div>
-        ) : tasks.length === 0 ? (
+        ) : filteredTasks.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state-icon">📝</div>
-            <div className="empty-state-text">No tasks yet. Create your first task!</div>
+            <div className="empty-state-icon">
+              {searchTerm || filterStatus !== 'all' || filterPriority !== 'all' ? '🔍' : '📝'}
+            </div>
+            <div className="empty-state-text">
+              {searchTerm || filterStatus !== 'all' || filterPriority !== 'all' 
+                ? 'No tasks match your filters' 
+                : 'No tasks yet. Create your first task!'}
+            </div>
           </div>
         ) : (
           <ul className="task-list">
-            {tasks.map(task => (
+            {filteredTasks.map(task => (
               <li 
                 key={task.id} 
                 className={`task-item ${task.completed ? 'completed' : ''}`}
+                style={{ borderLeftColor: getPriorityColor(task.priority) }}
               >
                 <input 
                   type="checkbox" 
@@ -100,8 +180,26 @@ export default function TaskBoard(){
                     <span className={`task-badge status-${task.status || 'todo'}`}>
                       {task.status || 'todo'}
                     </span>
+                    <span 
+                      className="task-badge priority-badge"
+                      style={{ 
+                        backgroundColor: `${getPriorityColor(task.priority)}33`,
+                        color: getPriorityColor(task.priority),
+                        borderColor: getPriorityColor(task.priority)
+                      }}
+                    >
+                      {task.priority === 'high' && '🔴'}
+                      {task.priority === 'medium' && '🟡'}
+                      {task.priority === 'low' && '🟢'}
+                      {' '}{task.priority || 'medium'}
+                    </span>
+                    {task.category && (
+                      <span className="task-badge category-badge">
+                        🏷️ {task.category}
+                      </span>
+                    )}
                     {task.dueAt && (
-                      <span className="task-badge" style={{ background: '#fee2e2', color: '#991b1b' }}>
+                      <span className="task-badge date-badge">
                         📅 {new Date(task.dueAt).toLocaleDateString()}
                       </span>
                     )}
@@ -109,10 +207,18 @@ export default function TaskBoard(){
                 </div>
                 <div className="task-actions">
                   <button 
+                    className="btn btn-edit" 
+                    onClick={() => handleEdit(task)}
+                    title="Edit task"
+                  >
+                    ✏️
+                  </button>
+                  <button 
                     className="btn btn-danger" 
                     onClick={() => handleDelete(task.id)}
+                    title="Delete task"
                   >
-                    🗑️ Delete
+                    🗑️
                   </button>
                 </div>
               </li>
@@ -122,6 +228,18 @@ export default function TaskBoard(){
       </div>
       
       <Dashboard tasks={tasks} />
+
+      {/* Edit Modal */}
+      {showModal && editingTask && (
+        <TaskModal
+          task={editingTask}
+          onSave={handleSaveEdit}
+          onClose={() => {
+            setShowModal(false);
+            setEditingTask(null);
+          }}
+        />
+      )}
     </div>
   );
 }
